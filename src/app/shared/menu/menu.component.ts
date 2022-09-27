@@ -14,6 +14,10 @@ interface MenuItem {
     li{
       cursor:pointer;
     }
+
+    li:hover{
+      color:blue;
+    }
     `
   ]
 })
