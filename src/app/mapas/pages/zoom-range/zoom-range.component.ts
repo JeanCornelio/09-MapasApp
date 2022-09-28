@@ -30,6 +30,7 @@ export class ZoomRangeComponent implements AfterViewInit, OnDestroy {
   zoomLevel: number = 15;
   center: [number, number]= [ -69.90150789722276, 18.501828157360432 ];
 
+
   constructor() { }
 
 //Con este metodo estamos destruyendo todos los listener creados.
@@ -40,12 +41,12 @@ export class ZoomRangeComponent implements AfterViewInit, OnDestroy {
   }
   //Este metodo se ejecuta luego de que el componente esta totalmente cargado despues de el Oninit
   ngAfterViewInit(): void {
-    console.log(this.divMapa);
     this.mapa = new mapboxgl.Map({
       container: this.divMapa.nativeElement,
       style: 'mapbox://styles/mapbox/streets-v11',
       center:this.center,
-      zoom: this.zoomLevel
+      zoom: this.zoomLevel,
+      
     })
 
     this.mapa.on('zoom', (ev)=>{
@@ -64,6 +65,7 @@ export class ZoomRangeComponent implements AfterViewInit, OnDestroy {
         this.center = [lng, lat];
        
       })
+
   }
 
   zoom(parameter:boolean){
