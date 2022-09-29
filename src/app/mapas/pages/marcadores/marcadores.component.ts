@@ -1,6 +1,12 @@
 import {  AfterViewInit, Component, ElementRef, ViewChild } from '@angular/core';
 import * as mapboxgl from 'mapbox-gl';
 
+interface MarcadorColor {
+  color: string;
+  marker?: mapboxgl.Marker;
+  center?: [number,number];
+}
+
 @Component({
   selector: 'app-marcadores',
   templateUrl: './marcadores.component.html',
@@ -30,6 +36,11 @@ export class MarcadoresComponent implements AfterViewInit {
   mapa!: mapboxgl.Map;
   zoomLevel: number = 15;
   center: [number, number]= [ -69.90150789722276, 18.501828157360432 ];
+
+  //Arreglo de Marcadores 
+
+  marcadores: MarcadorColor[] = [];
+
   constructor() { }
 
 
@@ -40,6 +51,8 @@ export class MarcadoresComponent implements AfterViewInit {
       center:this.center,
       zoom: this.zoomLevel,
     });
+
+    this.leerLocaleStorage();
 
 /*     const markerHTML : HTMLImageElement = document.createElement('img');
           markerHTML['src'] = '/assets/img/pngwing.com.png';
@@ -55,16 +68,87 @@ export class MarcadoresComponent implements AfterViewInit {
   }
   agregarMArcador(){
     const color = "#xxxxxx".replace(/x/g, y=>(Math.random()*16|0).toString(16));
+
     const nuevoMarcador = new mapboxgl.Marker({
       draggable: true,
       color
     })
           .setLngLat(this.center)
           .addTo(this.mapa);
+
+
+    this.marcadores.push({
+      color,
+      marker: nuevoMarcador
+    });
+
+    this.guardarMArcadoresLocalStorage()
+
+    nuevoMarcador.on('dragend',()=>{
+      this.guardarMArcadoresLocalStorage();
+    })
   }
 
-  irMarcador(){
-
+  irMarcador(marcador:mapboxgl.Marker){
+    this.mapa.flyTo({
+      center:marcador.getLngLat()
+    })
   }
  
+
+  guardarMArcadoresLocalStorage(){
+    
+    const lngLatArr: MarcadorColor[] = []; 
+
+    this.marcadores.forEach(m =>{
+      const color = m.color;
+      const {lng, lat} = m.marker!.getLngLat();
+
+      lngLatArr.push({
+         color,
+         center:[lng,lat]
+      })
+    })
+
+    localStorage.setItem('marcadores', JSON.stringify(lngLatArr));
+  }
+
+
+
+  leerLocaleStorage(){
+    if(!localStorage.getItem('marcadores')){
+      return
+    }
+
+    const lngLatArr: MarcadorColor[] = JSON.parse( localStorage.getItem('marcadores')!);
+    lngLatArr.forEach(m =>{
+
+      const newMarker = new  mapboxgl.Marker({
+        draggable: true,
+        color:m.color
+      })
+            .setLngLat(m.center!)
+            .addTo(this.mapa);
+
+            this.marcadores.push({
+              marker: newMarker,
+              color: m.color
+            });
+
+            newMarker.on('dragend',()=>{
+              this.guardarMArcadoresLocalStorage();
+            })
+
+    });
+
+  
+    
+
+}
+borrarMarcador(i:number){
+ this.marcadores[i].marker?.remove();
+ this.marcadores.splice(i,1);
+ this.guardarMArcadoresLocalStorage();
+}
+
 }
