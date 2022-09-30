@@ -141,9 +141,6 @@ export class MarcadoresComponent implements AfterViewInit {
 
     });
 
-  
-    
-
 }
 borrarMarcador(i:number){
  this.marcadores[i].marker?.remove();
